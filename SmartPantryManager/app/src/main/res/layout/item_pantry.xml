@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="8dp"
+    app:cardBackgroundColor="#FFF8F0"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="3dp"
+    app:strokeColor="#F3D6BC"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="18dp">
+
+        <TextView
+            android:id="@+id/textIngredientName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#2F2A26"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:text="Milk" />
+
+        <TextView
+            android:id="@+id/textQuantityUnit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="#E8752E"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="2 Litres" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="14dp"
+            android:layout_marginBottom="12dp"
+            android:background="#F3D6BC" />
+
+        <TextView
+            android:id="@+id/textExpiryDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#6D625A"
+            android:textSize="14sp"
+            tools:text="Expires: 2026-10-15" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

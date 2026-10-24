@@ -27,10 +27,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String CREATE_PANTRY_ITEMS_TABLE =
             "CREATE TABLE " + TABLE_PANTRY_ITEMS + " (" +
-                    COLUMN_PANTRY_ID + "INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    COLUMN_PANTRY_NAME + "TEXT NOT NULL," +
+                    COLUMN_PANTRY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COLUMN_PANTRY_NAME + " TEXT NOT NULL," +
                     COLUMN_PANTRY_QUANTITY + " REAL NOT NULL, " +
-                    COLUMN_PANTRY_UNIT + "TEXT NOT NULL, " +
+                    COLUMN_PANTRY_UNIT + " TEXT NOT NULL, " +
                     COLUMN_PANTRY_EXPIRY_DATE + " TEXT" +
                     ")";
 

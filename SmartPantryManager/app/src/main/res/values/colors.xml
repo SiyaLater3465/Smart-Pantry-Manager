@@ -1,5 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- Main brand colours -->
+    <color name="orange_primary">#FF6B3D</color>
+    <color name="orange_primary_dark">#E9562D</color>
+    <color name="orange_soft">#FFE8DC</color>
+
+    <!-- Screen and card colours -->
+    <color name="warm_background">#FFF8F3</color>
+    <color name="surface_white">#FFFFFF</color>
+    <color name="divider_colour">#EFE7E2</color>
+
+    <!-- Text colours -->
+    <color name="text_primary">#1B1B1B</color>
+    <color name="text_secondary">#747474</color>
+
+    <!-- Status colours -->
+    <color name="success_green">#2E7D32</color>
+    <color name="warning_amber">#F59E0B</color>
+    <color name="error_red">#D32F2F</color>
+
+    <!-- Standard colours -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
 </resources>
