@@ -49,6 +49,8 @@ public class AddEditIngredientActivity extends AppCompatActivity {
     private TextInputLayout layoutIngredientName;
     private TextInputLayout layoutQuantity;
     private TextInputLayout layoutUnit;
+    private int itemId = -1;
+    private boolean isEditMode = false;
 
 
     @Override
@@ -77,6 +79,15 @@ public class AddEditIngredientActivity extends AppCompatActivity {
 
         databaseHelper = new DatabaseHelper(this);
 
+        itemId = getIntent().getIntExtra( //This line reads the value sent by MainActivity
+                "item_id",
+                -1
+        );
+
+        if (itemId != -1) {
+            isEditMode = true;
+        }
+
         String[] units = {
                 "Items",
                 "Grams",
@@ -102,7 +113,11 @@ public class AddEditIngredientActivity extends AppCompatActivity {
 
         editExpiryDate.setOnClickListener(view -> showDatePicker());
 
-        buttonSaveIngredient.setOnClickListener(view -> saveIngredient()); // when user presses save ingredient, Android runs the saveIngriedient() method
+        buttonSaveIngredient.setOnClickListener(view -> saveIngredient());// when user presses save ingredient, Android runs the saveIngriedient() method
+
+        if (isEditMode) {
+            loadIngredientForEditing();
+        }
 
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -125,7 +140,7 @@ public class AddEditIngredientActivity extends AppCompatActivity {
 
                     String formmatedDate = String.format(
                             Locale.getDefault(),
-                            "%04d-$%02d-%02d",
+                            "%04d-%02d-%02d",
                             selectedYear,
                             selectedMonth + 1,
                             selectedDay
@@ -195,31 +210,73 @@ public class AddEditIngredientActivity extends AppCompatActivity {
                 expiryDate
         );
 
-        long itemId = databaseHelper.addPantryItem(pantryItem);
+        boolean operationSuccessful;
 
-        if (itemId != -1){
-            Toast.makeText(
-                    this,
-                    "Ingredient added successfully",
-                    Toast.LENGTH_LONG
-            ).show();
+        if (isEditMode) {
+            pantryItem.setId(itemId); //Important because the update query uses this ID to find the correct row
 
+            int updatedRows =
+                    databaseHelper.updatePantryItem(pantryItem);
+
+            operationSuccessful = updatedRows > 0;
+        }else {
+            long newItemId =
+                    databaseHelper.addPantryItem(pantryItem);
+
+            operationSuccessful = newItemId != -1;
+        }
+
+        //Choosing on whether you are editing or saving
+        if (operationSuccessful) {
+            String message = isEditMode
+                    ? "Ingredient updated successfully"
+                    : "Ingredient added successfully";
+
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
             setResult(RESULT_OK);
             finish();
         }else {
+            String message = isEditMode
+                    ? "Ingredient could not be updated "
+                    : "Ingredient could not be saved";
+
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void loadIngredientForEditing() {
+        PantryItem pantryItem =
+                databaseHelper.getPantryItemById(itemId);
+
+        if (pantryItem == null) {
             Toast.makeText(
                     this,
-                    "Ingredient could not be saved",
-                    Toast.LENGTH_LONG
+                    "Ingredient could not be found",
+                    Toast.LENGTH_SHORT
             ).show();
+
+            finish();
+            return;
         }
 
-        //What this code/method does:
-        //Reads everything entered into the form.
-        //Checks that the name, quantity, and unit are valid
-        //Creates a PantryItem object
-        //Sends that object to DatabaseHelper
-        //Shows a success message and closes the screen if saving works
-        //Shows an error message if the database operation fails.
+        editIngredientName.setText(
+                pantryItem.getName()
+        );
+
+        editQuantity.setText(
+                String.valueOf(pantryItem.getQuantity())
+        );
+
+        dropdownUnit.setText(
+                pantryItem.getUnit(),
+                false
+        );
+
+        editExpiryDate.setText(
+                pantryItem.getExpiryDate()
+        );
+
+        textScreenTitle.setText("Edit Ingredient");
+        buttonSaveIngredient.setText("Update Ingredient");
     }
 }

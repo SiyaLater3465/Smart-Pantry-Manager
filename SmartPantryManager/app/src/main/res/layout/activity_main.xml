@@ -54,6 +54,21 @@
         tools:itemCount="3"
         tools:listitem="@layout/item_pantry" />
 
+    <!--The message starts hidden and does not occupy layout space -->
+    <TextView
+        android:id="@+id/textEmptyPantry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Your pantry is empty.\nAdd your first ingredient below."
+        android:textColor="#796D64"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/buttonAddIngredient"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textPantrySubtitle" />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonAddIngredient"
         android:layout_width="0dp"

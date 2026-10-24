@@ -15,15 +15,29 @@ import com.example.smartpantrymanager.model.PantryItem;
 import java.text.NumberFormat;
 import java.util.List;
 
+import com.google.android.material.button.MaterialButton;
+
 
 
 public class PantryItemAdapter
        extends RecyclerView.Adapter<PantryItemAdapter.PantryItemViewHolder> {
 
+    public interface OnPantryItemActionListener {
+        void onEditClick(PantryItem pantryItem);
+        void onDeleteClick(PantryItem pantryItem);
+    }
     private List<PantryItem> pantryItems; //Stores all the pantry items that the adapter must display
+    private OnPantryItemActionListener actionListener;
 
     public PantryItemAdapter(List<PantryItem> pantryItems){
         this.pantryItems = pantryItems;
+    }
+
+    //This setter allows MainActivity to provide the behavior later.
+    public void setOnPantryItemActionListener(
+            OnPantryItemActionListener actionListener
+    ){
+        this.actionListener = actionListener;
     }
 
     //This method creates the visual ingredient cards
@@ -67,6 +81,22 @@ public class PantryItemAdapter
         }else {
             holder.textExpiryDate.setText("Expires: " + expiryDate);
         }
+
+        //This waits for the Edit button on the current card to be pressed.
+        //Sends current ingredient to the listener
+        holder.buttonEditIngredient.setOnClickListener(view ->{
+            if (actionListener != null) {
+                actionListener.onEditClick(pantryItem);
+            }
+        });
+
+        //Waits for the Delete button on the current card to be pressed
+        //Sends the same cards ingredients through
+        holder.buttonDeleteIngredient.setOnClickListener(view -> {
+            if (actionListener != null) { //check for null because it prevents the app from crashing if MainActivity has not provided a listener.
+                actionListener.onDeleteClick(pantryItem);
+            }
+        });
     }
 
     @Override
@@ -85,6 +115,8 @@ public class PantryItemAdapter
         private final TextView textIngredientName;
         private final TextView textQuantityUnit;
         private final TextView textExpiryDate;
+        private final MaterialButton buttonEditIngredient;
+        private final MaterialButton buttonDeleteIngredient;
 
         public PantryItemViewHolder(@NonNull View itemView){
             super(itemView);
@@ -95,6 +127,10 @@ public class PantryItemAdapter
             textQuantityUnit = itemView.findViewById(R.id.textQuantityUnit);
 
             textExpiryDate = itemView.findViewById(R.id.textExpiryDate);
+
+            buttonEditIngredient = itemView.findViewById(R.id.buttonEditIngredient);
+
+            buttonDeleteIngredient = itemView.findViewById(R.id.buttonDeleteIngredient);
 
         }
     }

@@ -21,11 +21,21 @@ import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.widget.TextView;
+
+import android.view.View;
+
+import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerPantryItems;
     private PantryItemAdapter pantryItemAdapter;
     private DatabaseHelper databaseHelper;
+    private TextView textEmptyPantry;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         recyclerPantryItems = findViewById(R.id.recyclerPantryItems);
+
+        textEmptyPantry = findViewById(R.id.textEmptyPantry);
 
         MaterialButton buttonAddIngredient = findViewById(R.id.buttonAddIngredient);
 
@@ -55,6 +67,32 @@ public class MainActivity extends AppCompatActivity {
         //RecyclerView provides the scrollable area on the screen
         //PantryItemAdapter receives ingredient objects and creates the appropriate cards
         //item_pantry.xml determines the visual appearance of each card
+
+        pantryItemAdapter.setOnPantryItemActionListener(
+                new PantryItemAdapter.OnPantryItemActionListener() {
+                    @Override
+                    public void onEditClick(PantryItem pantryItem) {
+                        //Creating navigation to the same screen currently used to add an ingredient
+                        Intent intent = new Intent(
+                                MainActivity.this,
+                                AddEditIngredientActivity.class
+                        );
+                        //An Intent can carry additional information between activities
+                        intent.putExtra(
+                                "item_id",
+                                pantryItem.getId()
+                        );
+
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onDeleteClick(PantryItem pantryItem) {
+                       showDeleteConfirmation(pantryItem);
+
+                    }
+                }
+        );
 
 
         buttonAddIngredient.setOnClickListener( view -> {
@@ -81,8 +119,41 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadPantryItems() {
         List<PantryItem> pantryItems =
-                databaseHelper.getAllPantryItems(); //The database returns all saved records as a list
+                databaseHelper.getAllPantryItems();//The database returns all saved records as a list
+
+        if(pantryItems.isEmpty()) {
+            //When it is empty, the message appear, and the empty RecyclerView is hidden
+            textEmptyPantry.setVisibility(View.VISIBLE);
+            recyclerPantryItems.setVisibility(View.GONE);
+        } else {
+            //When ingredients exist, the message disappears, and the ingredient cards are shown
+            textEmptyPantry.setVisibility(View.GONE);
+            recyclerPantryItems.setVisibility(View.VISIBLE);
+        }
 
         pantryItemAdapter.updateItems(pantryItems);
     }
-}
+
+    private void showDeleteConfirmation(PantryItem pantryItem) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete ingredient")
+                .setMessage(
+                        "Are you sure you want to detele " + pantryItem.getName() + "?"
+                )
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    databaseHelper.deletePantryItem(
+                            pantryItem.getId()
+                    );
+
+                    loadPantryItems();
+
+                    Toast.makeText(
+                            MainActivity.this,
+                            pantryItem.getName() + " deleted",
+                            Toast.LENGTH_SHORT
+                    ).show();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+        }
+    }

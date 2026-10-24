@@ -125,7 +125,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
-    public PantryItem getPantryItem(int id) {
+    public PantryItem getPantryItemById(int id) {
         SQLiteDatabase db = getReadableDatabase();
 
         String selection = COLUMN_PANTRY_ID + " = ?";
