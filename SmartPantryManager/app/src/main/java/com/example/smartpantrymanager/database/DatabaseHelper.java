@@ -16,6 +16,8 @@ import com.example.smartpantrymanager.model.Recipe;
 
 import com.example.smartpantrymanager.model.RecipeIngredient;
 
+import java.util.Locale;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
 //PANTRY TABLE
     private static final String DATABASE_NAME = "smart_pantry.db";
@@ -843,7 +845,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 null,
                 null,
                 null,
-                null,
                 RECIPE_COLUMN_NAME + " ASC"
         );
 
@@ -941,6 +942,222 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return ingredients;
     }
 
+    //Normalizing ingredient names
+    private String normalizeIngredientName(String ingredientName) {
+        if (ingredientName == null) {
+            return "";
+        }
+
+        String normalizedName = ingredientName
+                .toLowerCase(Locale.ROOT)
+                .trim()
+                .replaceAll("\\s+", " "); //replaces several spaces with one "chicken   breast" -> "chicken breast"
+
+        switch (normalizedName){
+            case "eggs":
+                return "egg";
+
+            case "tomatoes":
+                return "tomato";
+
+            case "potatoes":
+                return "potato";
+
+            case "bananas":
+                return "banana";
+
+            case "apples":
+                return "apple";
+
+
+            case "oranges":
+                return "orange";
+
+            case "carrots":
+                return "carrot";
+
+            case "chicken breast":
+            case "chicken breasts":
+                return "chicken";
+
+            case "lettuce leaves":
+                return "lettuce";
+
+            case "bread slices":
+                return "bread";
+
+            default:
+                return normalizedName;
+
+        }
+    }
+
+    //Normalizing Units
+    private String normalizeUnit(String unit) {
+        if (unit == null) {
+            return "";
+        }
+
+        String normalizedUnit = unit
+                .toLowerCase(Locale.ROOT)
+                .trim();
+
+        switch (normalizedUnit) {
+            case "g":
+            case "gram":
+            case "grams":
+                return "grams";
+
+            case "kg":
+            case "kilogram":
+            case "kilograms":
+                return "kilograms";
+
+            case "ml":
+            case "milliliter":
+            case "milliliters":
+            case "millilitre":
+            case "millilitres":
+                return "millilitres";
+
+            case "l":
+            case "liter":
+            case "liters":
+            case "litre":
+            case "litres":
+                return "litres";
+
+            case "item":
+            case "items":
+            case "piece":
+            case "pieces":
+                return "items";
+
+            default:
+                return normalizedUnit;
+        }
+    }
+
+    private double convertToBaseQuantity(
+            double quantity,
+            String unit
+    ){
+        String normalizedUnit = normalizeUnit(unit);
+
+        switch (normalizedUnit){
+            case "kilograms":
+                return quantity * 1000;
+
+            case "litres":
+                return quantity * 1000;
+
+            default:
+                return quantity;
+        }
+
+    }
+
+    private String getBaseUnit(String unit){
+        String normalizedUnit = normalizeUnit(unit);
+
+        switch (normalizedUnit) {
+            case "kilograms":
+            case "grams":
+                return "grams";
+
+            case "litres":
+            case "millilitres":
+                return "millilitres";
+
+            default:
+                return normalizedUnit;
+
+        }
+    }
+
+    //Checking whether the pantry has enough of one ingredient
+    private boolean hasEnoughIngredient(
+            List<PantryItem> pantryItems,
+            RecipeIngredient requiredIngredient
+    ) {
+        String requiredName = normalizeIngredientName(
+                requiredIngredient.getIngredientName()
+        );
+
+        String requiredBaseUnit = getBaseUnit(
+                requiredIngredient.getUnit()
+        );
+
+        double requiredQuantity = convertToBaseQuantity(
+                requiredIngredient.getRequiredQuantity(),
+                requiredIngredient.getUnit()
+        );
+
+        double totalAvailabilityQuantity = 0;
+
+        for (PantryItem pantryItem : pantryItems) {
+            String pantryName = normalizeIngredientName(
+                    pantryItem.getName()
+            );
+
+            String pantryBaseUnit = getBaseUnit(
+                    pantryItem.getUnit()
+            );
+
+            if (pantryName.equals(requiredName)
+                      && pantryBaseUnit.equals(requiredBaseUnit)) {
+
+                totalAvailabilityQuantity += convertToBaseQuantity(
+                        pantryItem.getQuantity(),
+                        pantryItem.getUnit()
+                );
+            }
+        }
+
+        return totalAvailabilityQuantity >= requiredQuantity;
+    }
+
+    //Strict matching, check whether an entire recipe can be made
+    private boolean canMakeRecipe(
+            Recipe recipe,
+            List<PantryItem> pantryItems
+    ){
+        List<RecipeIngredient> requiredIngredients =
+                getIngredientsForRecipe(recipe.getId()); //Retrieves every ingredient required by the selected recipe
+
+        if (requiredIngredients.isEmpty()) {
+            return false;
+        }
+
+        for (RecipeIngredient requiredIngredient : requiredIngredients) {
+            boolean ingredientAvailable = hasEnoughIngredient(
+                    pantryItems,
+                    requiredIngredient
+            );
+
+            if (!ingredientAvailable){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    //Return only the recipes the user can make
+    public List<Recipe> getSuggestedRecipes() {
+        List<PantryItem> pantryItems = getAllPantryItems(); //everything stored in the users pantry
+        List<Recipe> allRecipes = getAllRecipes(); //Retrieves everything that has been stored in seeded recipes
+
+        List<Recipe> suggestedRecipes = new ArrayList<>();
+
+        for (Recipe recipe : allRecipes) { //the loop tests each recipe individually
+            if (canMakeRecipe(recipe, pantryItems)) { //Only recipes that return true are added to the suggested list
+                suggestedRecipes.add(recipe);
+            }
+        }
+
+        return suggestedRecipes;
+    }
     public long addPantryItem(PantryItem pantryItem) {
         SQLiteDatabase db = getWritableDatabase();
 

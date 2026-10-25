@@ -50,6 +50,17 @@ public class MainActivity extends AppCompatActivity {
 
         MaterialButton buttonAddIngredient = findViewById(R.id.buttonAddIngredient);
 
+        MaterialButton buttonSuggestedRecipes = findViewById(R.id.buttonSuggestedRecipes);
+
+        buttonSuggestedRecipes.setOnClickListener(view -> {
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    SuggestedRecipesActivity.class
+            );
+
+            startActivity(intent);
+        });
+
         databaseHelper = new DatabaseHelper(this);
 
         //A RecyclerView does not automatically, know how to position its items.

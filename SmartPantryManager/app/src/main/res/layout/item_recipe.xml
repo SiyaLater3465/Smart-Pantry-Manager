@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    app:cardBackgroundColor="@color/pantry_card"
+    app:cardCornerRadius="22dp"
+    app:cardElevation="5dp"
+    app:strokeColor="#E7DDD2"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Final meal image -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imageRecipe"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:contentDescription="Recipe meal image"
+            android:scaleType="centerCrop"
+            android:background="@color/pantry_background"
+            tools:src="@tools:sample/backgrounds/scenic"
+            app:shapeAppearanceOverlay="@style/RecipeImageShape" />
+
+        <!-- Recipe information -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="18dp">
+
+            <!-- Small availability label -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/pantry_background"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="5dp"
+                android:text="READY TO MAKE"
+                android:textColor="@color/pantry_green"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <!-- Recipe heading -->
+            <TextView
+                android:id="@+id/textRecipeName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/pantry_text_dark"
+                android:textSize="23sp"
+                android:textStyle="bold"
+                tools:text="Cheese Omelette" />
+
+            <!-- Ingredients label -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Ingredients"
+                android:textColor="@color/pantry_green_dark"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <!-- Actual required ingredients -->
+            <TextView
+                android:id="@+id/textRecipeIngredients"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:lineSpacingExtra="3dp"
+                android:textColor="@color/pantry_text_muted"
+                android:textSize="14sp"
+                tools:text="2 eggs • 50 g cheese • 10 ml oil" />
+
+            <!-- View full recipe button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonViewRecipe"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="18dp"
+                android:text="View Recipe"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/pantry_orange"
+                app:cornerRadius="16dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

@@ -24,4 +24,12 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <color name="pantry_background">#FFF8EE</color>
+    <color name="pantry_green">#2E7D5B</color>
+    <color name="pantry_green_dark">#1E6045</color>
+    <color name="pantry_orange">#F29A5B</color>
+    <color name="pantry_text_dark">#24352E</color>
+    <color name="pantry_text_muted">#66766F</color>
+    <color name="pantry_card">#FFFFFF</color>
+
 </resources>
