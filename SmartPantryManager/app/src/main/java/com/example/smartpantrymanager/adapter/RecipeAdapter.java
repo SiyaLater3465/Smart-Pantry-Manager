@@ -24,7 +24,11 @@ import com.example.smartpantrymanager.model.RecipeIngredient;
 
 import java.util.List;
 
-import java.util.List;
+import android.content.Intent;
+
+import com.example.smartpantrymanager.RecipeDetailActivity;
+
+
 public class RecipeAdapter
         extends RecyclerView.Adapter<RecipeAdapter.RecipeViewHolder> {
 
@@ -166,6 +170,20 @@ public class RecipeAdapter
         holder.imageRecipe.setContentDescription(
                 recipe.getName() + " meal image"
         );
+
+        holder.buttonViewRecipe.setOnClickListener(view -> {
+            Intent intent = new Intent(
+                    context,
+                    RecipeDetailActivity.class
+            );
+
+            intent.putExtra( //When the user presses the cards button, this line stores its ID inside the intent
+                    "recipe_id",
+                    recipe.getId()
+            );
+
+            context.startActivity(intent);
+        });
     }
 
     @Override
