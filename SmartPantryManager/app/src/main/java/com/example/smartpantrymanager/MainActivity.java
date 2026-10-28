@@ -29,12 +29,24 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
+import android.content.SharedPreferences;
+
+import androidx.appcompat.app.AlertDialog;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerPantryItems;
     private PantryItemAdapter pantryItemAdapter;
     private DatabaseHelper databaseHelper;
     private TextView textEmptyPantry;
+    private SharedPreferences preferences;
+
 
 
     @Override
@@ -62,6 +74,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         databaseHelper = new DatabaseHelper(this);
+
+        preferences = getSharedPreferences(
+                SettingsActivity.PREFERENCES_NAME,
+                MODE_PRIVATE
+        );
 
         //A RecyclerView does not automatically, know how to position its items.
         //The LayoutManager knows how to control these cards (by default vertical)
@@ -125,6 +142,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadPantryItems();
+        checkExpiryAlerts(); //When expiry Alerts are enabled : retrieves all pantry ingredients, reads each, checks whether it expires today or next three days
+        // displays the matching ingredients in an alert window
     }
     //onResume runs whenever MainActivity becomes active and visible
 
@@ -143,6 +162,71 @@ public class MainActivity extends AppCompatActivity {
         }
 
         pantryItemAdapter.updateItems(pantryItems);
+    }
+
+    private void checkExpiryAlerts() {
+
+        boolean alertsEnabled = preferences.getBoolean(
+                SettingsActivity.KEY_EXPIRY_ALERTS,
+                false
+        );
+
+        //We stop here when the user has disabled expiry alerts.
+        if (!alertsEnabled) {
+            return;
+        }
+
+        List<PantryItem> pantryItems = databaseHelper.getAllPantryItems();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+        dateFormat.setLenient(false);
+
+        try {
+            //Remove the current time so only the dates are compared.
+            Date today = dateFormat.parse(dateFormat.format(new Date()));
+
+            Calendar expiryLimit = Calendar.getInstance();
+            expiryLimit.setTime(today);
+            expiryLimit.add(Calendar.DAY_OF_YEAR, 3); //Get todays date and then add three days
+
+            StringBuilder expiringItems = new StringBuilder();
+
+            for (PantryItem item : pantryItems) {
+
+                String expiryDateText = item.getExpiryDate();
+
+                if (expiryDateText == null || expiryDateText.trim().isEmpty()) { //Skips items without an expiry date
+                    continue;
+                }
+
+                Date expiryDate = dateFormat.parse(expiryDateText);
+
+                boolean expiresTodayOrLater = !expiryDate.before(today);
+                boolean expiresWithinThreeDays =
+                        !expiryDate.after(expiryLimit.getTime());
+
+                if (expiresTodayOrLater && expiresWithinThreeDays) {
+                    expiringItems
+                            .append("•")
+                            .append(item.getName())
+                            .append(" - ")
+                            .append(expiryDateText)
+                            .append("\n");
+                }
+            }
+
+            if (expiringItems.length() > 0) {
+                new AlertDialog.Builder(this)
+                        .setTitle("ingredients expiring soon")
+                        .setMessage(expiringItems.toString().trim())
+                        .setPositiveButton("OK", null)
+                        .show();
+            }
+
+        }catch (ParseException exception) {
+            exception.printStackTrace();
+        }
     }
 
     private void showDeleteConfirmation(PantryItem pantryItem) {
