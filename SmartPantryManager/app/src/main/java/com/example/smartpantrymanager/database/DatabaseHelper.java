@@ -1088,6 +1088,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             case "pieces":
                 return "items";
 
+            case "slice":
+            case "slices":
+                return "slice";
+
             default:
                 return normalizedUnit;
         }

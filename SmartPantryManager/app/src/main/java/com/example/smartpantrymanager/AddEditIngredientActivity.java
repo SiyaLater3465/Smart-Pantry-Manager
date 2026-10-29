@@ -26,6 +26,8 @@ import android.app.DatePickerDialog;
 import java.util.Calendar;
 import java.util.Locale;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 
 
 import com.example.smartpantrymanager.database.DatabaseHelper;
@@ -90,6 +92,7 @@ public class AddEditIngredientActivity extends AppCompatActivity {
 
         String[] units = {
                 "Items",
+                "Slices",
                 "Grams",
                 "Kilograms",
                 "Milliliters",
@@ -227,14 +230,20 @@ public class AddEditIngredientActivity extends AppCompatActivity {
         }
 
         //Choosing on whether you are editing or saving
-        if (operationSuccessful) {
-            String message = isEditMode
-                    ? "Ingredient updated successfully"
-                    : "Ingredient added successfully";
+       if (operationSuccessful) {
+           String message = isEditMode
+                   ? "Ingredient updated successfully"
+                   : "Ingredient added successfully";
 
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-            setResult(RESULT_OK);
-            finish();
+           new MaterialAlertDialogBuilder(this)
+                   .setTitle("Success")
+                   .setMessage(message)
+                   .setPositiveButton("OK", (dialog, which) -> {
+                       setResult(RESULT_OK);
+                       finish();
+                   })
+                   .show();
+
         }else {
             String message = isEditMode
                     ? "Ingredient could not be updated "

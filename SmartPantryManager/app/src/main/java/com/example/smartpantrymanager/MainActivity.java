@@ -41,6 +41,8 @@ import java.util.Locale;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import com.google.android.material.snackbar.Snackbar;
+
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerPantryItems;
@@ -286,28 +288,35 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-
     private void showDeleteConfirmation(PantryItem pantryItem) {
+
         new AlertDialog.Builder(this)
                 .setTitle("Delete ingredient")
                 .setMessage(
-                        "Are you sure you want to detele " + pantryItem.getName() + "?"
+                        "Are you sure you want to delete "
+                        + pantryItem.getName()
+                        + "?"
                 )
                 .setPositiveButton("Delete", (dialog, which) -> {
+
                     databaseHelper.deletePantryItem(
                             pantryItem.getId()
                     );
 
                     loadPantryItems();
 
-                    Toast.makeText(
-                            MainActivity.this,
-                            pantryItem.getName() + " deleted",
-                            Toast.LENGTH_SHORT
-                    ).show();
+                    Snackbar.make(
+                            findViewById(R.id.main),
+                            pantryItem.getName()
+                            + " deleted successfully",
+                            Snackbar.LENGTH_LONG
+                    )
+                            .setAnchorView(bottomNavigation)
+                            .show();
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
-        }
+    }
+
+
     }

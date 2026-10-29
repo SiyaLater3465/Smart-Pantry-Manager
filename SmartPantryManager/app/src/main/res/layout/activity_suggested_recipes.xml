@@ -135,8 +135,8 @@
         android:layout_height="wrap_content"
         android:background="@android:color/white"
         android:elevation="12dp"
-        app:itemIconTint="@color/pantry_green_dark"
-        app:itemTextColor="@color/pantry_green_dark"
+        app:itemIconTint="@color/bottom_navigation_colors"
+        app:itemTextColor="@color/bottom_navigation_colors"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_navigation_menu" />
 
