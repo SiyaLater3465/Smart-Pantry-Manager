@@ -39,6 +39,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerPantryItems;
@@ -46,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseHelper databaseHelper;
     private TextView textEmptyPantry;
     private SharedPreferences preferences;
+    private BottomNavigationView bottomNavigation;
 
 
 
@@ -57,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         recyclerPantryItems = findViewById(R.id.recyclerPantryItems);
+
+        bottomNavigation = findViewById(R.id.bottomNavigation);
 
         textEmptyPantry = findViewById(R.id.textEmptyPantry);
 
@@ -131,16 +136,54 @@ public class MainActivity extends AppCompatActivity {
 
             startActivity(intent);
         });
+
+        bottomNavigation.setOnItemSelectedListener(item -> {
+
+            int selectedItemId = item.getItemId();
+
+            if (selectedItemId == R.id.navigationPantry) {
+                //We are already on the pantry screen
+                return true;
+            }
+
+            if (selectedItemId == R.id.navigationRecipes) {
+                Intent intent = new Intent(
+                        MainActivity.this,
+                        SuggestedRecipesActivity.class
+                );
+
+                startActivity(intent);
+                return true;
+            }
+
+            if (selectedItemId == R.id.navigationSettings) {
+                Intent intent = new Intent(
+                        MainActivity.this,
+                        SettingsActivity.class
+                );
+
+                startActivity(intent);
+                return true;
+            }
+
+            return false;
+        });
+
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        bottomNavigation.setSelectedItemId(R.id.navigationPantry);
+
         loadPantryItems();
         checkExpiryAlerts(); //When expiry Alerts are enabled : retrieves all pantry ingredients, reads each, checks whether it expires today or next three days
         // displays the matching ingredients in an alert window
@@ -169,44 +212,57 @@ public class MainActivity extends AppCompatActivity {
         boolean alertsEnabled = preferences.getBoolean(
                 SettingsActivity.KEY_EXPIRY_ALERTS,
                 false
+
         );
 
-        //We stop here when the user has disabled expiry alerts.
         if (!alertsEnabled) {
             return;
         }
 
-        List<PantryItem> pantryItems = databaseHelper.getAllPantryItems();
+        List<PantryItem> pantryItems =
+                databaseHelper.getAllPantryItems();
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat dateFormat =
+                new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
         dateFormat.setLenient(false);
 
-        try {
-            //Remove the current time so only the dates are compared.
-            Date today = dateFormat.parse(dateFormat.format(new Date()));
+        Date today;
 
-            Calendar expiryLimit = Calendar.getInstance();
-            expiryLimit.setTime(today);
-            expiryLimit.add(Calendar.DAY_OF_YEAR, 3); //Get todays date and then add three days
+        try{
+            today = dateFormat.parse(
+                    dateFormat.format(new Date())
+            );
+        }catch (ParseException exception) {
+            return;
+        }
 
-            StringBuilder expiringItems = new StringBuilder();
+        Calendar expiryLimit = Calendar.getInstance();
+        expiryLimit.setTime(today);
+        expiryLimit.add(Calendar.DAY_OF_YEAR, 3);
 
-            for (PantryItem item : pantryItems) {
+        StringBuilder expiringItems = new StringBuilder();
 
-                String expiryDateText = item.getExpiryDate();
+        for (PantryItem item : pantryItems) {
 
-                if (expiryDateText == null || expiryDateText.trim().isEmpty()) { //Skips items without an expiry date
-                    continue;
-                }
+            String expiryDateText = item.getExpiryDate();
 
-                Date expiryDate = dateFormat.parse(expiryDateText);
+            if (expiryDateText == null ||
+            expiryDateText.trim().isEmpty()) {
+                continue;
+            }
 
-                boolean expiresTodayOrLater = !expiryDate.before(today);
-                boolean expiresWithinThreeDays =
-                        !expiryDate.after(expiryLimit.getTime());
+            try {
+                Date expiryDate =
+                        dateFormat.parse(expiryDateText.trim());
+
+                boolean expiresTodayOrLater =
+                        !expiryDate.before(today);
+
+                boolean expiresWithinThreeDays = !expiryDate.after(expiryLimit.getTime());
 
                 if (expiresTodayOrLater && expiresWithinThreeDays) {
+
                     expiringItems
                             .append("•")
                             .append(item.getName())
@@ -214,20 +270,23 @@ public class MainActivity extends AppCompatActivity {
                             .append(expiryDateText)
                             .append("\n");
                 }
+            }catch (ParseException exception) {
+                //We are ignoring this ingredient if its saved date is invalid
+                //This is because earlier I had accidently placed a $ sign on test data dates
+                //And now it won't validate the date when it gets to those dates with a dollar sign
             }
+        }
 
-            if (expiringItems.length() > 0) {
-                new AlertDialog.Builder(this)
-                        .setTitle("ingredients expiring soon")
-                        .setMessage(expiringItems.toString().trim())
-                        .setPositiveButton("OK", null)
-                        .show();
-            }
-
-        }catch (ParseException exception) {
-            exception.printStackTrace();
+        if (expiringItems.length() > 0) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Ingredients expiring soon")
+                    .setMessage(expiringItems.toString().trim())
+                    .setPositiveButton("OK", null)
+                    .show();
         }
     }
+
+
 
     private void showDeleteConfirmation(PantryItem pantryItem) {
         new AlertDialog.Builder(this)

@@ -19,19 +19,24 @@ import com.google.android.material.card.MaterialCardView;
 import java.util.ArrayList;
 import java.util.List;
 import android.view.View;
+import android.content.Intent;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 public class SuggestedRecipesActivity extends AppCompatActivity {
 
     private RecyclerView recyclerSuggestedRecipes;
     private MaterialCardView cardNoRecipes;
     private RecipeAdapter recipeAdapter;
     private DatabaseHelper databaseHelper;
+    private BottomNavigationView bottomNavigation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_suggested_recipes);
+
+        bottomNavigation = findViewById(R.id.bottomNavigation);
 
         MaterialButton buttonBackToPantry = findViewById(R.id.buttonBackToPantry);
 
@@ -60,6 +65,46 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
                 recipeAdapter
         );
 
+        bottomNavigation.setOnItemSelectedListener(item -> {
+
+            int selectedItemId = item.getItemId();
+
+            if (selectedItemId == R.id.navigationPantry) {
+                Intent intent = new Intent(
+                        SuggestedRecipesActivity.this,
+                        MainActivity.class
+                );
+
+                intent.addFlags(
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_SINGLE_TOP
+                );
+
+                startActivity(intent);
+                finish();
+                return true;
+            }
+
+            if (selectedItemId == R.id.navigationRecipes) {
+                //We are already on the Suggested Recipes screen.
+                return true;
+            }
+
+            if (selectedItemId == R.id.navigationSettings) {
+                Intent intent = new Intent(
+                        SuggestedRecipesActivity.this,
+                        SettingsActivity.class
+                );
+
+                startActivity(intent);
+                return true;
+            }
+
+            return false;
+        });
+
+        bottomNavigation.setSelectedItemId(R.id.navigationRecipes);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -87,6 +132,8 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        bottomNavigation.setSelectedItemId(R.id.navigationRecipes);
         loadSuggestedRecipes();
     }
 }

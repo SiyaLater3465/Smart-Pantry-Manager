@@ -21,6 +21,9 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import android.content.Intent;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -33,12 +36,16 @@ public class SettingsActivity extends AppCompatActivity {
     private SwitchMaterial switchExpiryAlerts;
     private TextView textExpiryAlertStatus;
     private SharedPreferences preferences;
+    private BottomNavigationView bottomNavigation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_settings);
+
+        bottomNavigation = findViewById(R.id.bottomNavigation);
+
 
         MaterialButton buttonBackFromSettings = findViewById(R.id.buttonBackFromSettings);
 
@@ -82,12 +89,65 @@ public class SettingsActivity extends AppCompatActivity {
                 }
         );
 
+        bottomNavigation.setOnItemSelectedListener(item -> {
+
+            int selectedItemId = item.getItemId();
+
+            if (selectedItemId == R.id.navigationPantry) {
+                Intent intent = new Intent(
+                        SettingsActivity.this,
+                        MainActivity.class
+                );
+
+                intent.addFlags(
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_SINGLE_TOP
+                );
+
+                startActivity(intent);
+                finish();
+                return true;
+            }
+
+            if (selectedItemId == R.id.navigationRecipes) {
+                Intent intent = new Intent(
+                        SettingsActivity.this,
+                        SuggestedRecipesActivity.class
+                );
+
+                intent.addFlags(
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_SINGLE_TOP
+                );
+
+                startActivity(intent);
+                finish();
+                return true;
+            }
+
+            if (selectedItemId == R.id.navigationSettings) {
+                //We are already on the Settings screen
+                return true;
+            }
+
+            return false;
+        });
+
+        bottomNavigation.setSelectedItemId(R.id.navigationSettings);
+
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        bottomNavigation.setSelectedItemId(R.id.navigationSettings);
     }
 
     private void updateAlertStatus(boolean alertsEnabled) {
